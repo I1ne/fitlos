@@ -53,14 +53,14 @@
 
 ## Как запустить локально
 
-### 1. Клонируйте репозиторий
+1. Клонируйте репозиторий:
 
 ```bash
 git clone https://github.com/I1ne/fitlos-analytics.git
 cd fitlos-analytics
 ```
 
-### 2. Создайте и активируйте виртуальное окружение
+2. Создайте и активируйте виртуальное окружение:
 
 ```bash
 python -m venv venv
@@ -68,13 +68,13 @@ source venv/bin/activate        # для Linux/macOS
 # venv\Scripts\activate         # для Windows
 ```
 
-### 3. Установите зависимости
+3. Установите зависимости:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Настройте PostgreSQL
+4. Настройте PostgreSQL:
 
 Убедитесь, что PostgreSQL запущен, и создайте базу данных:
 
@@ -82,7 +82,7 @@ pip install -r requirements.txt
 createdb fitness_db
 ```
 
-### 5. Создайте файл `.env` в корне проекта
+5. Создайте файл .env в корне проекта и добавьте ваши учётные данные GigaChat API:
 
 ```env
 # GigaChat API
@@ -102,13 +102,13 @@ DATABASE_URL=postgresql://user:password@localhost/fitness_db
 SECRET_KEY=your-secret-key-change-it
 ```
 
-### 6. Запустите сервер
+6. Запустите сервер:
 
 ```bash
 uvicorn app:app --reload
 ```
 
-### 7. Откройте в браузере
+7. Откройте в браузере:
 
 Перейдите по адресу [http://127.0.0.1:8000](http://127.0.0.1:8000).  
 Зарегистрируйтесь и войдите в систему.
