@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <meta charset="UTF-8">
+    <title>ФИТЛОСЬ – Аналитика</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #f5f7fb; display: flex; }
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #eef2f6;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar .logo-area { display: flex; align-items: center; gap: 12px; margin-bottom: 48px; }
+        .sidebar .logo-area img { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; }
+        .sidebar .logo-area span { font-weight: 700; font-size: 20px; color: #1a2c3e; }
+        .sidebar nav a {
+            display: block;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 60px;
+            color: #3a4b66;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active { background: #eef2fc; color: #2C6E9E; }
+        .main {
+            margin-left: 280px;
+            flex: 1;
+            padding: 32px 40px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f6;
+        }
+        .stat-card h3 { font-size: 13px; text-transform: uppercase; color: #8a99b4; margin-bottom: 8px; }
+        .stat-card .value { font-size: 32px; font-weight: 700; color: #1a2c3e; }
+        .section-title { font-size: 18px; font-weight: 600; margin: 24px 0 16px 0; display: flex; align-items: center; gap: 12px; }
+        table { width: 100%; background: white; border-radius: 20px; border-collapse: collapse; overflow: hidden; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #eef2f6; }
+        th { background: #fafbfd; font-weight: 600; color: #1f2a44; }
+        .badge-risk, .badge-low {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        .badge-risk { background: #FF9800; }
+        .badge-low { background: #4CAF50; }
+        .btn-sm { background: #2C6E9E; border: none; color: white; padding: 6px 14px; border-radius: 60px; cursor: pointer; font-size: 12px; }
+        .chat-accordion {
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #eef2f6;
+        }
+        .chat-header {
+            padding: 16px 20px;
+            background: #fafbfd;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px 20px 0 0;
+            font-weight: 600;
+        }
+        .chat-header:hover { background: #f0f2f6; }
+        .chat-body {
+            padding: 16px 20px;
+            display: none;
+            border-top: 1px solid #eef2f6;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #eef2fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .message-bubble {
+            flex: 1;
+            background: #f8fafd;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .message-bubble.client { background: #eef2fc; }
+        .message-time {
+            font-size: 11px;
+            color: #8a99b4;
+            margin-top: 4px;
+        }
+        .ai-recommendation {
+            background: #fff7e0;
+            padding: 12px;
+            border-radius: 16px;
+            margin-top: 12px;
+            font-size: 13px;
+            border-left: 3px solid #FF9800;
+        }
+        .proactive-banner {
+            background: #fff3e0;
+            border-left: 4px solid #FF9800;
+            padding: 12px 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .high-risk-list { list-style: none; margin-top: 8px; }
+        .high-risk-list li { padding: 6px 0; border-bottom: 1px solid #eef2f6; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="logo-area">
+        <img src="/static/logo.png" onerror="this.src='https://placehold.co/44x44?text=LOS'">
+        <span>ФИТЛОСЬ</span>
+    </div>
+    <nav>
+        <a href="#" onclick="showTab('clients');return false">Клиенты</a>
+        <a href="#" onclick="showTab('chats');return false">Чаты</a>
+        <a href="#" onclick="showTab('analytics');return false">Аналитика</a>
+    </nav>
+</div>
+<div class="main">
+    <div id="proactiveContainer" style="min-height: 70px;"></div>
+    <div class="stats" id="statsPanel"></div>
+
+    <div id="clientsTab">
+        <div class="section-title"><span>База клиентов Yclients</span> <button class="btn-sm" onclick="syncYclients()">Синхронизировать</button></div>
+        <table id="clientsTable">
+            <thead><tr><th>ID</th><th>ФИО</th><th>Телефон</th><th>Риск оттока</th><th>Последний визит</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="chatsTab" style="display:none">
+        <div class="section-title">Диалоги из мессенджера MAX</div>
+        <div id="chatList"></div>
+    </div>
+
+    <div id="analyticsTab" style="display:none">
+        <div class="section-title">Интеллектуальная аналитика</div>
+        <div id="analyticsPanel">Загрузка метрик...</div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('access_token');
+    if (!token) window.location.href = '/login';
+
+    async function apiFetch(endpoint, options={}) {
+        const res = await fetch(endpoint, {
+            ...options,
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', ...options.headers }
+        });
+        if (res.status === 401) window.location.href = '/login';
+        return res.json();
+    }
+
+    async function loadStats() {
+        const clients = await apiFetch('/api/clients');
+        const total = clients.length;
+        const highRisk = clients.filter(c => c.churn_risk > 0.6).length;
+        const avgRisk = (clients.reduce((a,b)=>a+b.churn_risk,0)/total).toFixed(2);
+        document.getElementById('statsPanel').innerHTML = `
+            <div class="stat-card"><h3>Всего клиентов</h3><div class="value">${total}</div></div>
+            <div class="stat-card"><h3>Высокий риск оттока</h3><div class="value">${highRisk}</div></div>
+            <div class="stat-card"><h3>Ср. риск оттока</h3><div class="value">${avgRisk}</div></div>
+        `;
+    }
+
+    async function loadClients() {
+    const clients = await apiFetch('/api/clients');
+    const tbody = document.querySelector('#clientsTable tbody');
+    tbody.innerHTML = '';
+    clients.forEach((c, idx) => {
+        const riskClass = c.churn_risk > 0.5 ? 'badge-risk' : 'badge-low';
+        const riskText = (c.churn_risk*100).toFixed(0)+'%';
+        const last = c.last_visit ? new Date(c.last_visit).toLocaleDateString('ru-RU') : '—';
+        tbody.innerHTML += `<tr>
+            <td>${idx+1}</td>
+            <td>${escapeHtml(c.name)}</td>
+            <td>${c.phone || '—'}</td>
+            <td><span class="${riskClass}">${riskText}</span></td>
+            <td>${last}</td>
+        </tr>`;
+    });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function loadChats() {
+        const chats = await apiFetch('/api/chats?limit=500');
+        const grouped = {};
+        for (let ch of chats) {
+            if (!grouped[ch.client_id]) grouped[ch.client_id] = [];
+            grouped[ch.client_id].push(ch);
+        }
+        // Сортировка внутри каждого клиента по времени
+        for (let id in grouped) {
+            grouped[id].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+        }
+        const clients = await apiFetch('/api/clients');
+        const clientNames = {};
+        clients.forEach(c => { clientNames[c.id] = c.name; });
+
+        const container = document.getElementById('chatList');
+        container.innerHTML = '';
+        for (let clientId in grouped) {
+            const msgs = grouped[clientId];
+            const clientName = clientNames[clientId] || `Клиент ${clientId}`;
+            const accordion = document.createElement('div');
+            accordion.className = 'chat-accordion';
+            // Добавляем иконку MAX (можно заменить на img, если положить max-icon.png в static)
+            accordion.innerHTML = `
+                <div class="chat-header" onclick="toggleChat(this)">
+                    <span>💬 ${escapeHtml(clientName)}</span>
+                    <span style="display: flex; gap: 8px; align-items: center;">
+                        <span>${msgs.length} сообщений</span>
+                        <span style="font-size: 18px;"><img src="/static/max-icon.png" style="width:20px"></span>
+                    </span>
+                </div>
+                <div class="chat-body"></div>
+            `;
+            const body = accordion.querySelector('.chat-body');
+            for (let msg of msgs) {
+                const isClient = msg.is_from_client;
+                const avatar = isClient ? '🧑' : '👩‍💼';
+                const sender = isClient ? 'Клиент' : 'Администратор';
+                const time = new Date(msg.timestamp).toLocaleDateString('ru-RU');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'message-row';
+                msgDiv.innerHTML = `
+                    <div class="message-avatar">${avatar}</div>
+                    <div class="message-bubble ${isClient ? 'client' : ''}">
+                        <div><strong>${sender}</strong> <span class="message-time">${time}</span></div>
+                        <div>${escapeHtml(msg.message)}</div>
+                    </div>
+                `;
+                body.appendChild(msgDiv);
+            }
+            // Кнопка анализа
+            const analyzeBtn = document.createElement('button');
+            analyzeBtn.className = 'btn-sm';
+            analyzeBtn.style.marginTop = '12px';
+            analyzeBtn.innerText = '🤖 Анализировать диалог';
+            const firstMsgId = msgs[0].id;
+            analyzeBtn.onclick = async () => {
+                const res = await fetch(`/api/analyze_chat/${firstMsgId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+                const existingRec = body.querySelector('.ai-recommendation');
+                if (existingRec) existingRec.remove();
+                const recDiv = document.createElement('div');
+                recDiv.className = 'ai-recommendation';
+                const riskPercent = Math.round(result.churn_probability * 100);
+                recDiv.innerHTML = `
+                    📝 <strong>Резюме:</strong> ${escapeHtml(result.summary)}<br>
+                    ⚠️ <strong>Риск оттока:</strong> ${riskPercent}%<br>
+                    📋 <strong>Черновик ответа:</strong> ${escapeHtml(result.draft_response || 'Предложите клиенту записаться на удобное время')}
+                `;
+                body.appendChild(recDiv);
+                if (document.getElementById('analyticsTab').style.display !== 'none') loadAnalytics();
+            };
+            body.appendChild(analyzeBtn);
+            container.appendChild(accordion);
+        }
+    }
+
+    function toggleChat(header) {
+        const body = header.parentElement.querySelector('.chat-body');
+        body.style.display = body.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    async function loadAnalytics() {
+    const metrics = await apiFetch('/api/analytics/metrics');
+    const segments = await apiFetch('/api/segments');  // ← новый запрос
+
+    // Блок сегментации
+    const riskSegmentsHtml = `
+        <div class="stats" style="margin-bottom: 24px;">
+            <div class="stat-card"><h3>📊 Сегментация по риску оттока</h3>
+                <div>🔵 Низкий (&lt;30%): ${segments.risk.low}</div>
+                <div>🟡 Средний (30-60%): ${segments.risk.medium}</div>
+                <div>🔴 Высокий (&gt;60%): ${segments.risk.high}</div>
+            </div>
+            <div class="stat-card"><h3>🏃 Сегментация по активности</h3>
+                <div>✅ Активные (последние 7 дней): ${segments.activity.active}</div>
+                <div>😴 Спящие (8-30 дней): ${segments.activity.sleeping}</div>
+                <div>❌ Потерянные (&gt;30 дней): ${segments.activity.lost}</div>
+            </div>
+        </div>
+    `;
+
+    const html = `
+        <div class="stats" style="margin-bottom: 24px;">
+            <div class="stat-card"><h3>📱 Всего диалогов</h3><div class="value">${metrics.total_dialogs}</div></div>
+            <div class="stat-card"><h3>⏱ Среднее время ответа</h3><div class="value">${metrics.avg_response_min} мин</div></div>
+            <div class="stat-card"><h3>📈 Конверсия в запись</h3><div class="value">${metrics.conversion_rate}%</div></div>
+        </div>
+        ${riskSegmentsHtml}
+        <div class="proactive-banner">
+            <span>⚠️ Проактивный анализ рисков</span>
+            <span>${metrics.proactive_message || '✅ На данный момент риски в норме'}</span>
+        </div>
+        <div class="section-title">Клиенты с высоким риском оттока (>60%)</div>
+        <ul class="high-risk-list">
+            ${metrics.high_risk_clients.map(c => `<li>🔴 ${escapeHtml(c.name)} (риск ${Math.round(c.risk*100)}%) — ${c.action}</li>`).join('') || '<li>✅ Нет клиентов с высоким риском</li>'}
+        </ul>
+        <div class="section-title">История лояльности</div>
+        <p>Для каждого клиента доступна история визитов и чатов (вкладка "Чаты"). Рекомендуемые действия генерируются ИИ.</p>
+    `;
+    document.getElementById('analyticsPanel').innerHTML = html;
+}
+
+    async function syncYclients() {
+        const msgDiv = document.createElement('div');
+        msgDiv.innerText = '⏳ Синхронизация с Yclients запущена...';
+        msgDiv.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#2C6E9E; color:white; padding:10px 20px; border-radius:60px; z-index:1000;';
+        document.body.appendChild(msgDiv);
+    
+        const res = await fetch('/api/sync_clients?company_id=860420', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+        msgDiv.remove();
+    
+        if (res.ok) {
+            const successDiv = document.createElement('div');
+            successDiv.innerText = '✅ Синхронизация завершена. Данные обновлены.';
+            successDiv.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#4CAF50; color:white; padding:10px 20px; border-radius:60px; z-index:1000;';
+            document.body.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 3000);
+            loadClients(); loadStats(); if (document.getElementById('analyticsTab').style.display !== 'none') loadAnalytics();
+        } else {
+            const errDiv = document.createElement('div');
+            errDiv.innerText = '❌ Ошибка синхронизации. Проверьте токены.';
+            errDiv.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#c2412c; color:white; padding:10px 20px; border-radius:60px; z-index:1000;';
+            document.body.appendChild(errDiv);
+            setTimeout(() => errDiv.remove(), 3000);
+        }
+    }
+
+    function showTab(tab) {
+        document.getElementById('clientsTab').style.display = 'none';
+        document.getElementById('chatsTab').style.display = 'none';
+        document.getElementById('analyticsTab').style.display = 'none';
+        if (tab === 'clients') {
+            document.getElementById('clientsTab').style.display = 'block';
+            loadClients(); loadStats();
+        } else if (tab === 'chats') {
+            document.getElementById('chatsTab').style.display = 'block';
+            loadChats();
+        } else if (tab === 'analytics') {
+            document.getElementById('analyticsTab').style.display = 'block';
+            loadAnalytics();
+        }
+        document.querySelectorAll('.sidebar nav a').forEach(link => link.classList.remove('active'));
+        if (tab === 'clients') document.querySelector('.sidebar nav a:nth-child(1)').classList.add('active');
+        if (tab === 'chats') document.querySelector('.sidebar nav a:nth-child(2)').classList.add('active');
+        if (tab === 'analytics') document.querySelector('.sidebar nav a:nth-child(3)').classList.add('active');
+    }
+
+    // Инициализация
+    loadStats();
+    loadClients();
+</script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ФИТЛОСЬ – вход и регистрация</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.05), 0 5px 12px rgba(0,0,0,0.1);
+            width: 460px;
+            padding: 40px 32px;
+            text-align: center;
+            border: 1px solid #eef2f6;
+        }
+        .logo { width: 80px; margin: 0 auto 20px; display: block; }
+        h2 { font-size: 28px; font-weight: 600; margin-bottom: 8px; color: #1a2c3e; }
+        .sub { color: #5e6f8d; margin-bottom: 32px; font-size: 14px; }
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: left;
+        }
+        .input-group {
+            position: relative;
+            width: 100%;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 60px;
+            border: 1px solid #e0e7ed;
+            background: #f9fafc;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2C6E9E;
+            box-shadow: 0 0 0 3px rgba(44,110,158,0.1);
+        }
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 20px;
+            color: #8a99b4;
+            user-select: none;
+        }
+        .btn-primary {
+            background: #2C6E9E;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+        }
+        .btn-primary:hover { background: #1f4e72; }
+        .btn-outline {
+            background: transparent;
+            color: #2C6E9E;
+            border: 1px solid #2C6E9E;
+            width: 100%;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-outline:hover {
+            background: rgba(44,110,158,0.05);
+        }
+        .btn-link {
+            background: none;
+            border: none;
+            color: #2C6E9E;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 16px;
+            text-decoration: underline;
+        }
+        .switch {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #5e6f8d;
+        }
+        .switch a {
+            color: #2C6E9E;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .message {
+            margin-top: 16px;
+            padding: 10px;
+            border-radius: 60px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+        .message.error { background: #ffe6e5; color: #c2412c; display: block; }
+        .message.success { background: #e0f2e9; color: #1e6f3f; display: block; }
+        .colors-badge {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 28px;
+        }
+        .color-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 28px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <img src="/static/logo.png" alt="Логотип" class="logo" onerror="this.src='https://placehold.co/80x80?text=LOS'">
+    <div id="login-view">
+        <h2>ФИТЛОСЬ</h2>
+        <div class="sub">Аналитика клиентского сервиса</div>
+        <div class="form">
+            <input type="text" id="login-username" placeholder="Логин">
+            <div class="input-group">
+                <input type="password" id="login-password" placeholder="Пароль">
+                <span class="toggle-password" onclick="togglePassword('login-password')">👁️</span>
+            </div>
+            <button class="btn-primary" onclick="doLogin()">Войти</button>
+            <button class="btn-outline" onclick="showRegister()">Зарегистрироваться</button>
+            <button class="btn-link" onclick="showResetPassword()">Забыли пароль?</button>
+        </div>
+    </div>
+
+    <div id="register-view" style="display: none;">
+        <h2>Регистрация</h2>
+        <div class="sub">Создайте учётную запись</div>
+        <div class="form">
+            <input type="text" id="reg-username" placeholder="Логин">
+            <div class="input-group">
+                <input type="password" id="reg-password" placeholder="Пароль">
+                <span class="toggle-password" onclick="togglePassword('reg-password')">👁️</span>
+            </div>
+            <button class="btn-primary" onclick="doRegister()">Зарегистрироваться</button>
+            <button class="btn-link" onclick="showLogin()">Назад ко входу</button>
+        </div>
+    </div>
+
+    <div id="reset-view" style="display: none;">
+        <h2>Сброс пароля</h2>
+        <div class="sub">Введите логин и новый пароль</div>
+        <div class="form">
+            <input type="text" id="reset-username" placeholder="Логин">
+            <div class="input-group">
+                <input type="password" id="reset-new-password" placeholder="Новый пароль">
+                <span class="toggle-password" onclick="togglePassword('reset-new-password')">👁️</span>
+            </div>
+            <button class="btn-primary" onclick="doResetPassword()">Сменить пароль</button>
+            <button class="btn-link" onclick="showLogin()">Вспомнил пароль</button>
+        </div>
+    </div>
+
+    <div id="msg" class="message"></div>
+    <div class="colors-badge">
+        <div class="color-dot"></div>
+        <div class="color-dot"></div>
+        <div class="color-dot"></div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const eye = field.parentElement.querySelector('.toggle-password');
+        if (field.type === 'password') {
+            field.type = 'text';
+            eye.textContent = '🙈';
+        } else {
+            field.type = 'password';
+            eye.textContent = '👁️';
+        }
+    }
+
+    function showLogin() {
+        document.getElementById('login-view').style.display = 'block';
+        document.getElementById('register-view').style.display = 'none';
+        document.getElementById('reset-view').style.display = 'none';
+        document.getElementById('msg').style.display = 'none';
+    }
+    function showRegister() {
+        document.getElementById('login-view').style.display = 'none';
+        document.getElementById('register-view').style.display = 'block';
+        document.getElementById('reset-view').style.display = 'none';
+        document.getElementById('msg').style.display = 'none';
+    }
+    function showResetPassword() {
+        document.getElementById('login-view').style.display = 'none';
+        document.getElementById('register-view').style.display = 'none';
+        document.getElementById('reset-view').style.display = 'block';
+        document.getElementById('msg').style.display = 'none';
+    }
+
+    async function doLogin() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        const msgDiv = document.getElementById('msg');
+        msgDiv.style.display = 'none';
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('access_token', data.access_token);
+            window.location.href = '/dashboard';
+        } else {
+            msgDiv.className = 'message error';
+            msgDiv.innerText = 'Ошибка входа. Неверный логин или пароль.';
+            msgDiv.style.display = 'block';
+        }
+    }
+
+    async function doRegister() {
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value.trim();
+        const msgDiv = document.getElementById('msg');
+        msgDiv.style.display = 'none';
+        if (!username || !password) {
+            msgDiv.className = 'message error';
+            msgDiv.innerText = 'Заполните оба поля.';
+            msgDiv.style.display = 'block';
+            return;
+        }
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        if (res.ok) {
+            msgDiv.className = 'message success';
+            msgDiv.innerText = 'Регистрация успешна! Теперь войдите.';
+            msgDiv.style.display = 'block';
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+            showLogin();
+        } else {
+            const err = await res.json();
+            msgDiv.className = 'message error';
+            msgDiv.innerText = err.detail || 'Ошибка регистрации. Возможно, пользователь уже существует.';
+            msgDiv.style.display = 'block';
+        }
+    }
+
+    async function doResetPassword() {
+        const username = document.getElementById('reset-username').value.trim();
+        const newPassword = document.getElementById('reset-new-password').value.trim();
+        const msgDiv = document.getElementById('msg');
+        msgDiv.style.display = 'none';
+        if (!username || !newPassword) {
+            msgDiv.className = 'message error';
+            msgDiv.innerText = 'Заполните оба поля.';
+            msgDiv.style.display = 'block';
+            return;
+        }
+        const res = await fetch('/api/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, new_password: newPassword })
+        });
+        if (res.ok) {
+            msgDiv.className = 'message success';
+            msgDiv.innerText = 'Пароль успешно изменён. Теперь войдите с новым паролем.';
+            msgDiv.style.display = 'block';
+            document.getElementById('reset-username').value = '';
+            document.getElementById('reset-new-password').value = '';
+            showLogin();
+        } else {
+            const err = await res.json();
+            msgDiv.className = 'message error';
+            msgDiv.innerText = err.detail || 'Ошибка: пользователь не найден.';
+            msgDiv.style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>
