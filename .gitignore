@@ -1,16 +1,29 @@
 gitignore
 
 
-# Виртуальное окружение и кэш
+# Виртуальное окружение
 venv/
-source/
+env/
+.venv/
+
+# Кэш Python
 __pycache__/
 *.pyc
+*.pyo
 
-# Сертификаты (ваши личные ключи доступа)
-certs/
-*.pem
-*.crt
+# Секреты
+.env
 
-# Системные файлы
+# Логи
+*.log
+
+# Временные файлы
+*.tmp
+*.swp
 .DS_Store
+
+# Служебные скрипты (не для репозитория)
+id_numeration.py
+load_chats_fixed.py
+new_clients.py
+
